@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
-// import { AsyncAPIClient } from '@mailchimp/mailchimp_marketing';
-import { MailchimpMarketing } from '@mailchimp/mailchimp_marketing';
+import { useState, useEffect } from "react";
+import MailchimpSubscribe from "react-mailchimp-subscribe";
+import { useGHStContext } from '../utils/ContextProvider'
 import CopyComponent from "./CopyComponent";
 import Testimonial from "./Testimonial";
 import "../css/About.css";
@@ -15,12 +15,25 @@ import icon from "../photos/Icon.png"
 
 
 
-const About = () => {
+const About = ({ status, message, onValidated }) => {
+
+    const { modalOpen, setModalOpen } = useGHStContext();
+
     const [showWaitlistForm, setShowWaitlistForm] = useState(false);
     const [email, setEmail] = useState("");
 
+    useEffect(() => {
+        if (status === "success") clearFields();
+        if (modalOpen && status === "success") clearFields();
+    }, [status, modalOpen])
+
+
+    const clearFields = () => {
+        setEmail('');
+    }
+
     const handleJoinWaitlistClick = () => {
-        console.log("andar to aa rha h...");
+        // console.log("andar to aa rha h...");
         setShowWaitlistForm(true);
         console.log(showWaitlistForm);
         const joinWaitlistFormSection = document.getElementById('joinWaitlistFormSection');
@@ -29,38 +42,21 @@ const About = () => {
         }
     };
 
-    const onGoogleLoginClick = useCallback(() => {
-        window.open("https://myaccount.google.com/");
-    }, []);
+    // const onGoogleLoginClick = useCallback(() => {
+    //     window.open("https://myaccount.google.com/");
+    // }, []);
 
-    const addEmailToMailchimp = async () => {
-        try {
-            const client = MailchimpMarketing.create();
-        client.setConfig({
-                apiKey: "e23e1fb9a9ce02ff805a4ca63ee22b3e", 
-                server: "us18", 
+
+
+    const handleSubmit = (e) => {
+        // console.log("innn!!!");
+        e.preventDefault();
+        if (email && email.indexOf("@") > -1 && onValidated) {
+            onValidated({
+                EMAIL: email,
             });
-            await client.lists.addListMember("d6eae59e12", {
-                email_address: email,
-                status: "subscribed",
-            });
-            console.log("Email added to Mailchimp audience successfully");
-            // You can show a success message to the user here if needed
-        } catch (error) {
-            console.error("Error adding email to Mailchimp:", error);
-            // You can show an error message to the user here if needed
         }
-    };
-
-    const handleEmailInputChange = (event) => {
-        setEmail(event.target.value);
-    };
-
-    // Function to handle clicking on "Continue with Email" button
-    const handleContinueWithEmailClick = () => {
-        addEmailToMailchimp();
-        // You can add additional logic here, like showing a loader or redirecting the user
-    };
+    }
 
     return (
         <div className="about">
@@ -90,6 +86,7 @@ const About = () => {
                         />
                     </div>
                 </section>
+
                 <section className="typetwo-column-big-image-stat">
                     <div className="wrapper">
                         <div className="text-content">
@@ -107,6 +104,7 @@ const About = () => {
                         />
                     </div>
                 </section>
+
                 <section className="typesimple-text-cards">
                     <div className="content">
                         <div className="heading-container">
@@ -143,6 +141,7 @@ const About = () => {
                         </div>
                     </div>
                 </section>
+
                 <section className="property-1big-numbers-just-te">
                     <div className="container">
                         <h1 className="heading1">How CorpoSale Works</h1>
@@ -168,6 +167,7 @@ const About = () => {
                         </div>
                     </div>
                 </section>
+
                 <section className="property-1testimonials-3x2-ca-wrapper">
                     <section className="property-1testimonials-3x2-ca">
                         <div className="heading-container1">
@@ -182,10 +182,6 @@ const About = () => {
                                 imageLummiCategoryavatars={avatar1}
                                 name1="Naina Saini"
                                 icon="stars"
-                            // icon1="/icon.svg"
-                            // icon2="/icon.svg"
-                            // icon3="/icon-3.svg"
-                            // icon4="/icon-4.svg"
                             />
                             <Testimonial
                                 shortTestimonial={`"I wanted an additional TV for our bedroom and someone from my own company was selling it as they were moving onsite. It was a steal deal given the price they were quoting! I brought it to my home within 2 hours of my first message. 100% Trust as the other person was an IT professional too."`}
@@ -265,77 +261,114 @@ const About = () => {
                         </div>
                     </section>
                 </section>
-                {/* <section className="property-1simple-centered-sig-wrapper"> */}
+
                 <section id="joinWaitlistFormSection" className="property-1simple-centered-sig-wrapper">
-                    {showWaitlistForm && (
-                        <div className="property-1simple-centered-sig">
-                            <div className="sign-up-container">
-                                <div className="copy-component2">
-                                    <img
-                                        className="image-lummi-categoryavat"
-                                        loading="lazy"
-                                        alt=""
-                                        src={yes}
-                                    />
-                                    <div className="frame-parent">
-                                        <div className="sign-up-heading-parent">
-                                            <h1 className="sign-up-heading">Join Waitlist</h1>
-                                            <div className="subheading-wrapper">
-                                                <div className="subheading4">
-                                                    We’ll verify your email and genuineness of your
-                                                    corporate status.
-                                                </div>
+                    <div className="property-1simple-centered-sig">
+                        <div className="sign-up-container">
+                            <div className="copy-component2">
+                                <img
+                                    className="image-lummi-categoryavat"
+                                    loading="lazy"
+                                    alt=""
+                                    src={yes}
+                                />
+                                <div className="frame-parent">
+                                    <div className="sign-up-heading-parent">
+                                        <h1 className="sign-up-heading">Join Waitlist</h1>
+                                        <div className="subheading-wrapper">
+                                            <div className="subheading4">
+                                                We’ll verify your email and genuineness of your
+                                                corporate status.
                                             </div>
-                                            <button
-                                                className="google-login"
-                                                onClick={onGoogleLoginClick}
-                                            >
-                                                <img
-                                                    className="google-icon"
-                                                    alt=""
-                                                    src="/google-icon.svg"
-                                                />
-                                                <div className="continue-with-google">
-                                                    Continue with LinkedIn
-                                                </div>
-                                            </button>
                                         </div>
-                                        <div className="frame-group">
-                                            <div className="line-wrapper">
-                                                <div className="line" />
+                                        <button
+                                            className="google-login"
+                                        // onClick={onGoogleLoginClick}
+                                        >
+                                            <img
+                                                className="google-icon"
+                                                alt=""
+                                            // src="/google-icon.svg"
+                                            />
+                                            <div className="continue-with-google">
+                                                Continue with LinkedIn
                                             </div>
-                                            <div className="or">or</div>
-                                            <div className="line-container">
-                                                <div className="line1" />
-                                            </div>
+                                        </button>
+                                    </div>
+                                    <div className="frame-group">
+                                        <div className="line-wrapper">
+                                            <div className="line" />
+                                        </div>
+                                        <div className="or">or</div>
+                                        <div className="line-container">
+                                            <div className="line1" />
                                         </div>
                                     </div>
-                                    <div className="form">
+                                </div>
+                                <form className="form" onSubmit={(e) => handleSubmit(e)}>
+                                    <h3 className="mc__title">
+                                        {status === "success" ? "Success!" :
+                                            null}
+                                    </h3>
+
+                                    {status === "sending" && (
+                                        <div className="mc__alert mc__alert--sending">
+                                            sending...
+                                        </div>
+                                    )}
+                                    {status === "error" && (
+                                        <div
+                                            className="mc__alert mc__alert--error"
+                                            dangerouslySetInnerHTML={{ __html: message }}
+                                        />
+                                    )}
+                                    {status === "success" && (
+                                        <div
+                                            className="mc__alert mc__alert--success"
+                                            dangerouslySetInnerHTML={{ __html: message }}
+                                        />
+                                    )}
+                                    {/* {console.log("status",status)}; */}
+                                    {status !== "success" ? (
                                         <div className="input">
                                             <div className="label">Email Address</div>
                                             <div className="input-form">
                                                 <input
                                                     className="text-container1"
                                                     placeholder="Enter your email"
-                                                    type="text"
+                                                    type="email"
                                                     value={email}
-                                                    onChange={handleEmailInputChange}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                // onChangeHandler={setEmail}
                                                 />
                                             </div>
                                         </div>
-                                        <button className="button" onClick={handleContinueWithEmailClick}>
-                                            <div className="text-container2">
-                                                <div className="cta1">Continue with Email</div>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <div className="by-continuing-you">
-                                        By signing up you accept our Terms and Privacy
-                                    </div>
+                                    ) : null}
+                                    {
+                                        status === 'success' ? (
+                                            <button className="button" onClick={() => setModalOpen(false)} aria-label="Close">
+                                                <div className="text-container2">
+                                                    <div className="cta1">Close</div>
+                                                </div>
+                                            </button>
+                                        ) : (
+                                            <input
+                                                type="submit"
+                                                className="button"
+                                                value="Continue with Email"
+                                                formValues={[email]}
+                                            />
+                                        )
+                                    }
+
+                                </form>
+                                <div className="by-continuing-you">
+                                    By signing up you accept our Terms and Privacy
                                 </div>
                             </div>
                         </div>
-                    )}
+                    </div>
+                    {/* )} */}
                 </section>
                 <section className="bubble-container-wrapper">
                     <footer className="bubble-container">
@@ -373,7 +406,7 @@ const About = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="divider" /> 
+                        <div className="divider" />
                         <div className="legals">
                             <div className="copyright-wrapper">
                                 <div className="copyright">© DirectDeal 2024</div>
@@ -387,6 +420,29 @@ const About = () => {
                 </section>
             </main>
         </div>
-    )
-}
-export default About
+    );
+};
+// export default About;
+// import React from 'react';
+// import MailchimpSubscribe from "react-mailchimp-subscribe";
+// import About from './About';
+
+const MailchimpFormContainer = props => {
+    const postUrl = `https://gmail.us18.list-manage.com/subscribe/post?u=${process.env.REACT_APP_MAILCHIMP_U}&id=${process.env.REACT_APP_MAILCHIMP_ID}`;
+
+    return (
+        <div className="mc__form-container">
+            <MailchimpSubscribe url={postUrl}
+                render={({ subscribe, status, message }) => (
+                    <About
+                        status={status}
+                        message={message}
+                        onValidated={formData => subscribe(formData)}
+                    />
+                )}
+            />
+        </div>
+    );
+};
+
+export default MailchimpFormContainer;

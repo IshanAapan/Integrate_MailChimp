@@ -1,15 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-// import App from './App';
+import App from './App';
 import reportWebVitals from './reportWebVitals';
-import About from './Components/About';
+import { GHStProvider } from './utils/ContextProvider';
+
+// import About from './Components/About';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    {/* <App /> */}
-    <About/>
+     <GHStProvider>
+      <App />
+    </GHStProvider>
   </React.StrictMode>
 );
 
